@@ -137,6 +137,7 @@ def all_mp2rage_files():
 twix_files = failed_mp2rage_files()
 #twix_files = all_mp2rage_files()
 twix_files = ['meas_MID159_sLaser_Lw_FID118907.dat']
+twix_files = ['meas_MID213_MP2RAGE_UK7T_081018_tfl_wip944_b17stx_FID98696.dat']
 
 for ff in twix_files:
     twix_path = os.path.join(twix_top_dir, ff)
@@ -145,6 +146,7 @@ for ff in twix_files:
     #  if it's a bad file, then do twix_partial_write here...
     #   ...
     out_path = os.path.join(out_dir, 'twix_mod.dat')
+    print(ff)
     print("hdr_start", str(hdr_start))
-    twix_utils.twix_partial_write(twix_path, out_path, 0, 200)
+    twix_utils.twix_partial_write(twix_path, out_path, hdr_start)
 
