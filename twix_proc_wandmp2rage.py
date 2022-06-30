@@ -5,7 +5,7 @@ import twix_utils
 
 #twix_top_dir = '/cubric/scanners/mri/7t/transfer/314_WAND/'
 twix_top_dir = '/home/sapje1/scratch_sapje1/projects/314_wand/twix_mp2rage'
-out_dir = '/home/sapje1/scratch_sapje1/projects/314_wand/twix_mp2rage'
+out_dir = os.path.join(twix_top_dir, 'mp2rage_twix_fix')
 
 def working_mp2rage_files():
     work_twix = [ '314_17726_2C/meas_MID441_MP2RAGE_UK7T_081018_tfl_wip944_b17stx_FID115897.dat',\
@@ -16,6 +16,7 @@ def failed_mp2rage_files():
     fail_twix = ['314_22482_2C/meas_MID213_MP2RAGE_UK7T_081018_tfl_wip944_b17stx_FID98696.dat',\
                  '314_04843_2C/meas_MID135_MP2RAGE_UK7T_081018_tfl_wip944_b17stx_FID107659.dat' ]
     return fail_twix
+    
 
 def all_mp2rage_files():
     all_twix = [ '314_01187_2C/meas_MID97_MP2RAGE_UK7T_081018_tfl_wip944_b17stx_FID115298.dat', \
@@ -133,20 +134,8 @@ def all_mp2rage_files():
     '314_99501_2C/meas_MID181_MP2RAGE_UK7T_081018_tfl_wip944_b17stx_FID86800.dat' ]
     return all_twix
 
-#twix_files = working_mp2rage_files()
-twix_files = failed_mp2rage_files()
-#twix_files = all_mp2rage_files()
-twix_files = ['meas_MID159_sLaser_Lw_FID118907.dat']
-twix_files = ['meas_MID213_MP2RAGE_UK7T_081018_tfl_wip944_b17stx_FID98696.dat']
-
-for ff in twix_files:
-    twix_path = os.path.join(twix_top_dir, ff)
-    twix_hdr_in = twix_utils.twix_dump_data(twix_path)
-    hdr_start = twix_utils.twix_find_header_start(twix_hdr_in)
-    #  if it's a bad file, then do twix_partial_write here...
-    #   ...
-    out_path = os.path.join(out_dir, 'twix_mod.dat')
-    print(ff)
-    print("hdr_start", str(hdr_start))
-    twix_utils.twix_partial_write(twix_path, out_path, hdr_start)
-
+one_twix = twix_utils.TwixFix('/home/sapje1/scratch_sapje1/projects/314_wand/twix_mp2rage/meas_MID159_sLaser_Lw_FID118907.dat')
+one_twix.dump_data()
+one_twix.find_header_start()
+twix_out = '/home/sapje1/scratch_sapje1/projects/314_wand/twix_mp2rage/twix_out.dat'
+one_twix.partial_write(twix_out, 0, 4096, 1)
