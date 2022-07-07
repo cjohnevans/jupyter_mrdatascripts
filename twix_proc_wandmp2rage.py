@@ -2,21 +2,34 @@ import os
 import sys
 sys.path.append('/home/sapje1/code/python_mrobjects')
 import twix_utils
+import datetime
 
-#twix_top_dir = '/cubric/scanners/mri/7t/transfer/314_WAND/'
-twix_top_dir = '/home/sapje1/scratch_sapje1/projects/314_wand/twix_mp2rage'
-out_dir = os.path.join(twix_top_dir, 'mp2rage_twix_fix')
+def get_one_bad_twix_file():
+    return(['/cubric/scanners/mri/7t/transfer/314_WAND/314_73512_2C/meas_MID104_MP2RAGE_UK7T_081018_tfl_wip944_b17stx_FID73231.dat'])
 
-def working_mp2rage_files():
-    work_twix = [ '314_17726_2C/meas_MID441_MP2RAGE_UK7T_081018_tfl_wip944_b17stx_FID115897.dat',\
-                  '314_72783_2C/meas_MID94_MP2RAGE_UK7T_081018_tfl_wip944_b17stx_FID106545.dat' ]
-    return work_twix
+def get_ian_mp2rage_files():
+#    search_dir = '/cubric/scanners/mri/7t/transfer/314_WAND'
+    search_dir = '/cubric/scanners/mri/7t/transfer/314_WAND/'
+    ppt_list = []
+    ppt_list_file = open('/home/sapje1/code/python_mrscripts/missingRR20220629.txt', 'r')
+    next_ppt = ppt_list_file.readline()
+    while(next_ppt):
+        ppt_list.append(next_ppt[0:-1] + "_2C")  # append, after stripping '\n'
+        next_ppt = ppt_list_file.readline()
+    ppt_list_file.close()
 
-def failed_mp2rage_files():
-    fail_twix = ['314_22482_2C/meas_MID213_MP2RAGE_UK7T_081018_tfl_wip944_b17stx_FID98696.dat',\
-                 '314_04843_2C/meas_MID135_MP2RAGE_UK7T_081018_tfl_wip944_b17stx_FID107659.dat' ]
-    return fail_twix
-    
+    ian_mp2rage_to_proc = []
+    for (path, dirs, files) in os.walk(search_dir):
+        for ppt in ppt_list:
+            if ppt in path.split('/')[-1]:
+#                print("ppt " + ppt + " is in  " + path.split('/')[-1])
+                for dat_file in files:
+                    if 'MP2RAGE_UK7T_081018_tfl_wip944_b17stx' in dat_file:
+#                        print("MP2RAGE file is ", os.path.join(path, dat_file))
+                        ian_mp2rage_to_proc.append(os.path.join(path, dat_file))
+    print(ian_mp2rage_to_proc)
+    print(len(ian_mp2rage_to_proc))
+    return(ian_mp2rage_to_proc)
 
 def all_mp2rage_files():
     all_twix = [ '314_01187_2C/meas_MID97_MP2RAGE_UK7T_081018_tfl_wip944_b17stx_FID115298.dat', \
@@ -134,8 +147,24 @@ def all_mp2rage_files():
     '314_99501_2C/meas_MID181_MP2RAGE_UK7T_081018_tfl_wip944_b17stx_FID86800.dat' ]
     return all_twix
 
-one_twix = twix_utils.TwixFix('/home/sapje1/scratch_sapje1/projects/314_wand/twix_mp2rage/meas_MID159_sLaser_Lw_FID118907.dat')
-one_twix.dump_data()
-one_twix.find_header_start()
-twix_out = '/home/sapje1/scratch_sapje1/projects/314_wand/twix_mp2rage/twix_out.dat'
-one_twix.partial_write(twix_out, 0, 4096, 1)
+#twix_top_dir = '/cubric/scanners/mri/7t/transfer/314_WAND/'
+twix_top_dir = '/home/sapje1/scratch_sapje1/projects/314_wand/twix_mp2rage'
+out_dir = os.path.join(twix_top_dir, 'mp2rage_twix_fix')
+
+twix_file_list = get_ian_mp2rage_files()
+#twix_file_list = get_one_bad_twix_file()
+
+for twix_file in twix_file_list:
+    one_twix = twix_utils.TwixFix(twix_file)
+    one_twix.dump_data()
+    one_twix.find_header_start()
+    if(one_twix.header_is_good()):
+        print(twix_file, "is good")
+    else:
+        print(twix_file, "is bad")
+        twix_file_out = twix_file.split('.')[0] + '_headerfix_' + \
+                        datetime.datetime.now().strftime("%Y%m%d%H%M%S") + '.dat' 
+        print("Writing " + twix_file_out + "\n")
+        one_twix.partial_write(twix_file_out, 4096)
+
+
