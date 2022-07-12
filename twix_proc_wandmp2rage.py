@@ -164,7 +164,6 @@ for twix_file in twix_file_list:
         print(twix_file, "is bad")
         twix_file_out = twix_file.split('.')[0] + '_headerfix_' + \
                         datetime.datetime.now().strftime("%Y%m%d%H%M%S") + '.dat' 
-        print("Writing " + twix_file_out + "\n")
-        one_twix.partial_write(twix_file_out, 4096)
+        one_twix.partial_write(twix_file_out)
 
 
